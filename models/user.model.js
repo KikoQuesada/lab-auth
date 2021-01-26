@@ -55,7 +55,7 @@ userSchema.pre('save', function (next) {
 
 userSchema.methods.checkPassword = function (passwordToCheck) {
 // Iteration 2: compare passwords with bcrypt
-  return Promise.reject(false);
+  return bcrypt.compare(passwordToCheck, this.password);
 };
 
 const User = mongoose.model('User', userSchema);

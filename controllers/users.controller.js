@@ -44,6 +44,22 @@ module.exports.login = (req, res, next) => {
 
 module.exports.doLogin = (req, res, next) => {
   // Iteration 2: login user
+  User.findOne({ email: req.body.email, verified: { $ne: null } })
+    .then((user) => {
+      if(user) {
+        user.checkPassword(req.body.password).then((match) => {
+          if(match) {
+            req.session.currentUserId = user.id;
+            res.redirect('/');
+          }else {
+            res.render('user/login', { user: req.body, errors: { password: 'invalid password'} });
+          }
+        });
+      }else {
+        res.render('user/login', { user: req.body, errors: { email: 'user not found or not verified' } });
+      }
+    })
+    .catch(next);
   // Iteration 4: clean this method and login the user with passport
 };
 

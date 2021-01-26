@@ -5,12 +5,14 @@ const express = require('express');
 const logger = require('morgan');
 const path = require('path');
 const passport = require('passport');
+const User = require('./models/user.model');
 
 require('./config/hbs.config');
 require('./config/db.config');
 const session = require('./config/session.config');
 
 const app = express();
+
 
 /**
  * Middlewares
@@ -19,14 +21,34 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(logger('dev'));
 // Iteration 2: configure session
+app.use(session);
 
 app.use((req, res, next) => {
   // la variable path se podrá usar desde cualquier vista de hbs (/register, /posts)
   res.locals.path = req.path;
+  next();
+});
 
+app.use((req, res, next) => {
   // Iteration 2: load session user if exists at the session cookie and set the user at locals & request.
-
-  next(); // think where this next() must be called =D
+  res.locals.currentUser = req.session.currentUserId;
+  if (req.session.currentUserId || req.path === '/login') {
+    User.findById(req.session.currentUserId)
+      .then((user) => {
+        if (user) {
+          res.locals.currentUser = user;
+          req.currentUser = user;
+          next();
+        }else {
+          res.redirect('/login');
+        }
+      })
+      .catch(() => {
+        res.redirect('/login');
+      });
+  }else {
+    res.redirect('/login');
+  }
 });
 
 /**
