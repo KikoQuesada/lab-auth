@@ -32,22 +32,20 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   // Iteration 2: load session user if exists at the session cookie and set the user at locals & request.
   res.locals.currentUser = req.session.currentUserId;
-  if (req.session.currentUserId || req.path === '/login') {
+  if (req.session.currentUserId) {
     User.findById(req.session.currentUserId)
       .then((user) => {
         if (user) {
           res.locals.currentUser = user;
           req.currentUser = user;
-          next();
         }else {
-          res.redirect('/login');
+          req.session.currentUserId = undefined;
         }
+        next();
       })
-      .catch(() => {
-        res.redirect('/login');
-      });
+      .catch(next);
   }else {
-    res.redirect('/login');
+    next();
   }
 });
 

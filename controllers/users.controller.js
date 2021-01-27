@@ -52,11 +52,11 @@ module.exports.doLogin = (req, res, next) => {
             req.session.currentUserId = user.id;
             res.redirect('/');
           }else {
-            res.render('user/login', { user: req.body, errors: { password: 'invalid password'} });
+            res.render('users/login', { user: req.body, errors: { password: 'invalid password'} });
           }
         });
       }else {
-        res.render('user/login', { user: req.body, errors: { email: 'user not found or not verified' } });
+        res.render('users/login', { user: req.body, errors: { email: 'user not found or not verified' } });
       }
     })
     .catch(next);
@@ -64,7 +64,8 @@ module.exports.doLogin = (req, res, next) => {
 };
 
 module.exports.logout = (req, res, next) => {
-  // Iteration 2: logout
+  req.session.destroy();
+  res.redirect('/login');
 };
 
 module.exports.list = (req, res, next) => {
@@ -86,3 +87,4 @@ module.exports.activate = (req, res, next) => {
     }
   }).catch(next);
 };
+
